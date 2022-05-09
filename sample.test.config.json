@@ -4,9 +4,9 @@
   "Clients": 100,
   "Iterations": 100,
   "Host": "http://localhost:8000",
-  "Headers": [
-    { "taco": "bell" }
-  ],
+  "Headers": { 
+    "taco": "bell"
+  },
   "Requests": [
     {
       "Url": "/",
