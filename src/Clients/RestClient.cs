@@ -1,4 +1,5 @@
 using System.Reactive.Subjects;
+using System.Text.Json.Nodes;
 using LoadTester.IO;
 using LoadTester.Settings;
 
@@ -14,10 +15,13 @@ public class RestClient : IClient
     private HttpClient _client;
     private Subject<(RequestConfig request, StringContent payload)> _pusherMan;
     
-    public RestClient(string host, Subject<(RequestConfig request, StringContent payload)> subject)
+    public RestClient(TestConfig config, Subject<(RequestConfig request, StringContent payload)> subject)
     {
         _client = StaticClient.HttpClient;
-        _client.BaseAddress = new(uriString: host);
+        _client.BaseAddress = new(uriString: config.Host ?? throw new Exception("Host null in test config"));
+        foreach (var header in config.Headers)
+            if (!string.IsNullOrWhiteSpace(header.Key))
+                _client.DefaultRequestHeaders.Add($"{header.Key}", $"{header.Value}");
         _pusherMan = subject;
         _pusherMan.Subscribe(onNext: async data => await Invoke(data.request, data.payload));
     }

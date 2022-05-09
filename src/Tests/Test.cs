@@ -8,13 +8,14 @@ namespace LoadTester.Tests;
 
 public abstract class Test : ITest
 {
-    public Test(TestConfig testConfig)
+    protected Test(TestConfig testConfig)
     {
         TestConfig = testConfig;
+        Requests = testConfig.Iterations * testConfig.Clients;
     }
 
-    protected TestConfig TestConfig;
-    protected int Requests = 0;
+    protected readonly TestConfig TestConfig;
+    protected readonly int Requests;
     protected DateTime StartTime = DateTime.Now;
     protected Subject<(RequestConfig request, StringContent payload)>[] PusherMen =
         Array.Empty<Subject<(RequestConfig request, StringContent payload)>>();
@@ -48,8 +49,8 @@ public abstract class Test : ITest
             pusherIndex = pusherIndex < PusherMen.Length ? pusherIndex : 0;
             ClientStore[i] = TestConfig.ClientType switch
             {
-                ClientTypes.REST => new RestClient(TestConfig.Host ?? "", pusherMan),
-                ClientTypes.WEBSOCKET => new WebsocketClient(TestConfig.Host ?? "", TestConfig.TestType ?? "FIRE", pusherMan),
+                ClientTypes.REST => new RestClient(TestConfig, pusherMan),
+                ClientTypes.WEBSOCKET => new WebsocketClient(TestConfig, pusherMan),
                 _ => throw new Exception("Invalid Client Type"),
             };
         }
@@ -61,7 +62,7 @@ public abstract class Test : ITest
 
     public virtual void Dispose()
     {
-        foreach (var pusher in PusherMen) pusher.Dispose();
-        foreach (var client in ClientStore) client.Dispose();
+        foreach (var pusher in PusherMen) pusher?.Dispose();
+        foreach (var client in ClientStore) client?.Dispose();
     }
 }

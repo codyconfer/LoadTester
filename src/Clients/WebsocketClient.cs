@@ -14,13 +14,16 @@ public class WebsocketClient : IClient
     private ClientWebSocket _clientWebSocket;
     private bool _keepConnection = false;
 
-    public WebsocketClient(string host, string testType, Subject<(RequestConfig request, StringContent payload)> subject)
+    public WebsocketClient(TestConfig config, Subject<(RequestConfig request, StringContent payload)> subject)
     {
-        _host = host;
+        _host = config.Host ?? throw new Exception("Host null in test config");
         _pusherMan = subject;
         _pusherMan.Subscribe(onNext: async data => await Invoke(data.request, data.payload));
-        _testType = testType;
+        _testType = config.TestType ?? TestTypes.FIRE;
         _clientWebSocket = new ClientWebSocket();
+        foreach (var header in config.Headers)
+            if (!string.IsNullOrWhiteSpace(header.Key))
+                _clientWebSocket.Options.SetRequestHeader($"{header.Key}", $"{header.Value}");
     }
 
     public async Task Invoke(RequestConfig request, StringContent payload)

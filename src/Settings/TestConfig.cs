@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace LoadTester.Settings;
 
 public class TestConfig
@@ -7,6 +9,6 @@ public class TestConfig
     public int Clients { get; set; }
     public int Iterations { get; set; }
     public string? Host { get; set; }
-    public object? Headers { get; set; }
-    public List<RequestConfig> Requests { get; set; } = new List<RequestConfig>();
+    public JsonObject Headers { get; set; } = new();
+    public List<RequestConfig> Requests { get; set; } = new();
 }
